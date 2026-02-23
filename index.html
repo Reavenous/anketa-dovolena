@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anketa – Jaký typ dovolené?</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- ---- Navigace ---- -->
+    <nav>
+      <a href="index.html" class="active">🗳️ Hlasování</a>
+      <a href="about.html">ℹ️ O anketě</a>
+    </nav>
+
+    <!-- ---- Formulář ankety ---- -->
+    <div class="card" id="vote-card">
+      <h1>🌴 Dovolená – Anketa</h1>
+      <p class="subtitle">Vyber jednu možnost a odešli svůj hlas.</p>
+
+      <h2>Jaký typ dovolené je pro tebe ten pravý?</h2>
+
+      <form id="vote-form">
+        <ul class="options-list">
+          <li>
+            <label class="option-label">
+              <input type="radio" name="option" value="a" />
+              <span> a) Klasická válečka na pláži u moře.</span>
+            </label>
+          </li>
+          <li>
+            <label class="option-label">
+              <input type="radio" name="option" value="b" />
+              <span> b) Aktivní turistika na horách.</span>
+            </label>
+          </li>
+          <li>
+            <label class="option-label">
+              <input type="radio" name="option" value="c" />
+              <span> c) Poznávací zájezd po památkách a městech.</span>
+            </label>
+          </li>
+          <li>
+            <label class="option-label">
+              <input type="radio" name="option" value="d" />
+              <span> d) Nejlépe si odpočinu doma (tzv. staycation).</span>
+            </label>
+          </li>
+        </ul>
+
+        <!-- Zpráva po hlasování -->
+        <div id="vote-message" class="message"></div>
+
+        <button type="submit" class="btn btn-primary">Odeslat hlas ✅</button>
+        <button type="button" class="btn btn-secondary" id="show-results-btn">
+          Zobrazit výsledky bez hlasování 
+        </button>
+      </form>
+    </div>
+
+    <!-- ---- Výsledky ---- -->
+    <div class="card" id="results-card" style="display:none;">
+      <h2> Aktuální výsledky</h2>
+      <ul class="results-list" id="results-list">
+        <!-- Výsledky se vloží přes JavaScript -->
+      </ul>
+      <p class="total-votes" id="total-votes-text"></p>
+
+      <button type="button" class="btn btn-secondary" id="vote-again-btn" style="margin-top:20px;">
+        ← Zpět na hlasování
+      </button>
+    </div>
+
+    <!-- ---- Reset sekce ---- -->
+    <div class="card reset-section">
+      <details>
+        <summary> Reset hlasování (pouze administrátor)</summary>
+        <div class="reset-content">
+          <input type="text" id="reset-token-input" placeholder="Zadej bezpečnostní token..." />
+          <button type="button" class="btn btn-danger" id="reset-btn">Vynulovat hlasy</button>
+        </div>
+        <div id="reset-message" class="message" style="margin: 0 18px 16px;"></div>
+      </details>
+    </div>
+
+    <footer>
+      Hlasovací aplikace &copy; 2025 Alexandre Basseville
+    </footer>
+
+  </div>
+
+  <!-- ============================================================
+       JavaScript – komunikace s API pomocí Fetch
+       ============================================================ -->
+  <script>
+    // ---- Selektory elementů ----
+    const voteForm = document.getElementById("vote-form");
+    const voteCard = document.getElementById("vote-card");
+    const resultsCard = document.getElementById("results-card");
+    const resultsList = document.getElementById("results-list");
+    const totalVotesText = document.getElementById("total-votes-text");
+    const voteMessage = document.getElementById("vote-message");
+    const showResultsBtn = document.getElementById("show-results-btn");
+    const voteAgainBtn = document.getElementById("vote-again-btn");
+    const resetBtn = document.getElementById("reset-btn");
+    const resetTokenInput = document.getElementById("reset-token-input");
+    const resetMessage = document.getElementById("reset-message");
+
+    // Mapování klíčů na popisky (emoji + text)
+    const optionLabels = {
+      a: " Pláž u moře",
+      b: " Turistika na horách",
+      c: " Poznávací zájezd",
+      d: " Staycation doma"
+    };
+
+    // ---- Zobrazení výsledků ----
+    function renderResults(data) {
+      resultsList.innerHTML = "";
+      const total = data.totalVotes || 0;
+
+      for (const key of ["a", "b", "c", "d"]) {
+        const votes = data.votes[key] || 0;
+        const pct = total > 0 ? Math.round((votes / total) * 100) : 0;
+
+        const li = document.createElement("li");
+        li.className = "result-item";
+        li.innerHTML = `
+          <div class="result-header">
+            <span class="result-label">${optionLabels[key]}</span>
+            <span class="result-count">${votes} hlasů (${pct}%)</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: ${pct}%"></div>
+          </div>
+        `;
+        resultsList.appendChild(li);
+      }
+
+      totalVotesText.textContent = `Celkem hlasů: ${total}`;
+
+      // Přepnutí karet
+      voteCard.style.display = "none";
+      resultsCard.style.display = "block";
+    }
+
+    // ---- Odeslání hlasu ----
+    voteForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const selected = voteForm.querySelector('input[name="option"]:checked');
+      if (!selected) {
+        showMessage(voteMessage, "error", "❗ Prosím, vyber jednu možnost.");
+        return;
+      }
+
+      try {
+        const res = await fetch("/vote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ option: selected.value })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showMessage(voteMessage, "error", data.error || "Chyba serveru.");
+          return;
+        }
+
+        // Úspěch – zobraz výsledky
+        renderResults(data.results);
+      } catch (err) {
+        showMessage(voteMessage, "error", "Nepodařilo se spojit se serverem.");
+      }
+    });
+
+    // ---- Zobrazit výsledky bez hlasování ----
+    showResultsBtn.addEventListener("click", async () => {
+      try {
+        const res = await fetch("/results");
+        const data = await res.json();
+        renderResults(data);
+      } catch (err) {
+        showMessage(voteMessage, "error", "Nepodařilo se načíst výsledky.");
+      }
+    });
+
+    // ---- Zpět na hlasování ----
+    voteAgainBtn.addEventListener("click", () => {
+      resultsCard.style.display = "none";
+      voteCard.style.display = "block";
+      voteMessage.className = "message"; // Skrytí zprávy
+      voteMessage.textContent = "";
+      voteForm.reset();
+    });
+
+    // ---- Reset hlasování ----
+    resetBtn.addEventListener("click", async () => {
+      const token = resetTokenInput.value.trim();
+      if (!token) {
+        showMessage(resetMessage, "error", "❗ Zadej bezpečnostní token.");
+        return;
+      }
+
+      try {
+        const res = await fetch("/reset", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showMessage(resetMessage, "error", data.error || "Reset se nezdařil.");
+          return;
+        }
+
+        showMessage(resetMessage, "success", "✅ " + data.message);
+        resetTokenInput.value = "";
+      } catch (err) {
+        showMessage(resetMessage, "error", "Nepodařilo se spojit se serverem.");
+      }
+    });
+
+    // ---- Pomocná funkce pro zobrazení zprávy ----
+    function showMessage(el, type, text) {
+      el.textContent = text;
+      el.className = `message ${type}`;
+    }
+  </script>
+
+</body>
+</html>

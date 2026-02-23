@@ -1,0 +1,16 @@
+{
+  "question": "Jaký typ dovolené je pro tebe ten pravý?",
+  "options": {
+    "a": "Klasická válečka na pláži u moře.",
+    "b": "Aktivní turistika na horách.",
+    "c": "Poznávací zájezd po památkách a městech.",
+    "d": "Nejlépe si odpočinu doma (tzv. staycation)."
+  },
+  "votes": {
+    "a": 0,
+    "b": 0,
+    "c": 0,
+    "d": 0
+  },
+  "totalVotes": 0
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>O anketě – Jaký typ dovolené?</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- ---- Navigace ---- -->
+    <nav>
+      <a href="index.html">🗳️ Hlasování</a>
+      <a href="about.html" class="active">ℹ️ O anketě</a>
+    </nav>
+
+    <!-- ---- Obsah stránky ---- -->
+    <div class="card about-content">
+      <h1>ℹ️ O anketě</h1>
+      <p class="subtitle">Informace o projektu a kontakt pro hlášení chyb</p>
+
+      <h2>Co je cílem ankety?</h2>
+      <p>
+        Tato webová aplikace slouží jako školní projekt zaměřený na výuku tvorby
+        jednoduchých webových aplikací v prostředí Node.js s frameworkem Express.js.
+        Anketa zjišťuje, jaký typ dovolené preferují návštěvníci stránky.
+      </p>
+
+      <h2>Jak anketa funguje?</h2>
+      <p>
+        Uživatel vybere jednu ze čtyř možností a odešle svůj hlas. Server hlas uloží
+        do souboru <strong>data.json</strong>, takže výsledky jsou sdílené pro všechny
+        návštěvníky a přetrvají i po restartu serveru. Výsledky je možné zobrazit
+        i bez hlasování.
+      </p>
+
+      <h2>Technické informace</h2>
+      <p>
+        Aplikace je postavena na technologiích <strong>Node.js</strong> a
+        <strong>Express.js</strong>. Frontend komunikuje se serverem pomocí
+        <strong>Fetch API</strong> (moderní JavaScript bez závislostí). Aplikace
+        je hostována na platformě <strong>Replit</strong> a monitorována službou
+        <strong>UptimeRobot</strong>, která kontroluje dostupnost každých 5 minut.
+      </p>
+
+      <h2>Autor</h2>
+      <p>
+        <strong>Alexandre Basseville</strong><br />
+        Školní projekt – kurz webového vývoje
+      </p>
+
+      <h2>Hlášení technických nebo jiných chyb</h2>
+      <p>
+        Pokud narazíš na technickou chybu, nesprávné zobrazení nebo jiný problém,
+        prosím napiš na e-mail:
+        <a href="mailto:chyby@anketa-example.cz">chyby@anketa-example.cz</a>
+      </p>
+      <p>
+        Ve zprávě uveď prosím:
+      </p>
+      <p>
+        1. Popis chyby (co se stalo, co jsi očekával).<br />
+        2. Prohlížeč a zařízení, které používáš.<br />
+        3. Případný screenshot nebo chybovou zprávu.
+      </p>
+      <p>
+        Na každé hlášení se budeme snažit reagovat do 2 pracovních dnů. Děkujeme!
+      </p>
+    </div>
+
+    <footer>
+      Hlasovací aplikace &copy; 2025 Alexandre Basseville
+    </footer>
+
+  </div>
+
+</body>
+</html>
