@@ -1,20 +1,19 @@
-# 🗳️ Hlasovací aplikace – Jaký typ dovolené?
+#  Hlasovací aplikace – Jaký typ dovolené?
 
 **Autor:** Alexandre Basseville  
-**Platforma:** Replit (Node.js)  
+**Platforma:** Render.com (propojeno s GitHubem)  
 **Framework:** Express.js  
-
 ---
 
-## 📋 Popis projektu
+##  Popis projektu
 
 Jednoduchá webová aplikace pro hlasování v anketě. Uživatelé hlasují pro jeden ze čtyř typů dovolené. Výsledky jsou sdílené pro všechny návštěvníky a uloženy v souboru `data.json`, takže přežijí restart serveru.
 
-Aplikace je hostována na platformě **Replit** a monitorována službou **UptimeRobot**.
+Aplikace je hostována na platformě **Render.com** (propojené s GitHub repozitářem) a monitorována službou **UptimeRobot**, která ji každých 5 minut pinguje, aby aplikace neusnula a soubor `data.json` nebyl smazán.
 
 ---
 
-## 📁 Struktura složek
+##  Struktura složek
 
 ```
 voting-app/
@@ -30,7 +29,7 @@ voting-app/
 
 ---
 
-## 🌐 Endpointy (URL adresy)
+##  Endpointy (URL adresy)
 
 | Metoda | URL          | Popis                                                                 |
 |--------|--------------|-----------------------------------------------------------------------|
@@ -38,19 +37,19 @@ voting-app/
 | GET    | `/about.html`| Stránka „O anketě"                                                    |
 | GET    | `/results`   | Vrátí aktuální výsledky hlasování jako JSON                           |
 | POST   | `/vote`      | Uloží hlas; tělo: `{ "option": "a" }` (a/b/c/d)                      |
-| POST   | `/reset`     | Vynuluje hlasy; tělo: `{ "token": "..." }` (token ověřen ze Secrets) |
+| POST   | `/reset`     | Vynuluje hlasy; tělo: `{ "token": "..." }` (token ověřen z Environment Variables) |
 
 ---
 
-## 🖼️ Wireframe diagram
+##  Wireframe diagram
 
 Přibližné rozložení prvků na hlavní stránce (`index.html`):
 
 ```mermaid
 graph TD
-    subgraph Stránka["🌐 Hlavní stránka (index.html)"]
-        NAV["🔗 Navigace: [ Hlasování ] [ O anketě ]"]
-        CARD1["📋 Karta: Anketa
+    subgraph Stránka[" Hlavní stránka (index.html)"]
+        NAV[" Navigace: [ Hlasování ] [ O anketě ]"]
+        CARD1[" Karta: Anketa
         ─────────────────────────────
         Nadpis: Jaký typ dovolené?
         ○ a) Pláž u moře
@@ -58,9 +57,9 @@ graph TD
         ○ c) Poznávací zájezd
         ○ d) Staycation doma
         ─────────────────────────────
-        [ ✅ Odeslat hlas ]
-        [ 📊 Zobrazit výsledky ]"]
-        CARD2["📊 Karta: Výsledky (zobrazí se po hlasování)
+        [  Odeslat hlas ]
+        [  Zobrazit výsledky ]"]
+        CARD2[" Karta: Výsledky (zobrazí se po hlasování)
         ─────────────────────────────
         Pláž u moře     ████░░ 40%
         Hory            ██░░░░ 20%
@@ -69,10 +68,10 @@ graph TD
         ─────────────────────────────
         Celkem: 10 hlasů
         [ ← Zpět na hlasování ]"]
-        CARD3["🔒 Sbalitelná sekce: Reset
+        CARD3[" Sbalitelná sekce: Reset
         ─────────────────────────────
         [ Token: _______ ] [ Vynulovat ]"]
-        FOOTER["📄 Footer – jméno autora"]
+        FOOTER[" Footer – jméno autora"]
     end
 
     NAV --> CARD1
@@ -84,69 +83,122 @@ graph TD
 
 ---
 
-## 🏗️ Deployment diagram
+##  Deployment diagram
 
-Diagram znázorňuje komunikaci mezi uživatelem, serverem a monitorovací službou:
+Diagram znázorňuje celý tok od vývoje až po monitoring:
 
 ```mermaid
 graph LR
-    USER["👤 Uživatel\n(prohlížeč)"]
-    REPLIT["☁️ Replit Server\n────────────────\nNode.js + Express.js\ndata.json\n.env Secrets"]
-    UPTIME["🔍 UptimeRobot\n(monitoring 24/7)"]
-    EMAIL["📧 E-mail\nupozornění"]
+    DEV[" Vývojář\n(lokální PC)"]
+    GITHUB[" GitHub\nrepozitář"]
+    RENDER[" Render.com\n────────────────\nNode.js + Express.js\ndata.json\nEnvironment Variables"]
+    USER[" Uživatel\n(prohlížeč)"]
+    UPTIME[" UptimeRobot\n(monitoring 24/7)"]
+    EMAIL[" E-mail\nupozornění"]
 
-    USER -- "HTTP GET/POST\n(hlasování, výsledky)" --> REPLIT
-    REPLIT -- "JSON odpověď" --> USER
-    UPTIME -- "HTTP ping každých 5 min" --> REPLIT
-    REPLIT -- "HTTP 200 OK" --> UPTIME
+    DEV -- "git push" --> GITHUB
+    GITHUB -- "automatický deploy\npři každém push" --> RENDER
+    USER -- "HTTP GET/POST\n(hlasování, výsledky)" --> RENDER
+    RENDER -- "JSON / HTML odpověď" --> USER
+    UPTIME -- "HTTP ping každých 5 min\n(udržuje aplikaci vzhůru)" --> RENDER
+    RENDER -- "HTTP 200 OK" --> UPTIME
     UPTIME -- "Alert při výpadku" --> EMAIL
 ```
 
 ---
 
-## 🚀 Postup nasazení na Replit (krok za krokem)
+##  Postup nasazení na Render.com (krok za krokem)
 
-### 1. Vytvoření projektu
-1. Přihlaste se na [replit.com](https://replit.com).
-2. Klikněte na **+ Create Repl**.
-3. Vyberte šablonu **Node.js**.
-4. Pojmenujte projekt (např. `voting-app`) a potvrďte.
+### 1. Příprava a nahrání kódu na GitHub
 
-### 2. Nahrání souborů
-1. V levém panelu klikněte na ikonu **Files**.
-2. Nahrajte nebo překopírujte tyto soubory:
-   - `server.js` – do kořenové složky
-   - `data.json` – do kořenové složky
-   - `package.json` – do kořenové složky
-   - `public/index.html` – vytvořte složku `public/` a vložte
-   - `public/about.html` – vložte do `public/`
-   - `public/style.css` – vložte do `public/`
+1. Přihlaste se nebo se zaregistrujte na [github.com](https://github.com).
+2. Klikněte na **+ New repository**, pojmenujte ho (např. `voting-app`) a potvrďte **Create repository**.
+3. Otevřete terminál ve VS Code (`Ctrl + `` ` ```) v kořenové složce projektu a spusťte:
 
-### 3. Nastavení tajného tokenu
-1. V levém panelu klikněte na **Tools → Secrets** (nebo ikona zámku 🔒).
-2. Přidejte nový secret:
-   - **Key:** `RESET_TOKEN`
-   - **Value:** vaše heslo (např. `MojeHeslo123!`)
-3. Uložte.
+```bash
+git init
+git add .
+git commit -m "První verze hlasovací aplikace"
+git branch -M main
+git remote add origin https://github.com/VASE-UZIVATELSKE-JMENO/voting-app.git
+git push -u origin main
+```
 
-### 4. Instalace závislostí a spuštění
-1. Replit automaticky spustí `npm install` při prvním spuštění.
-2. Klikněte na zelené tlačítko **▶ Run**.
-3. Aplikace se zobrazí v pravém panelu (vestavěný prohlížeč) nebo na URL:  
-   `https://nazev-vascho-replu.uzivatelske-jmeno.repl.co`
+4. Obnovte stránku repozitáře na GitHubu – měli byste vidět všechny nahrané soubory včetně složky `public/`.
 
-### 5. Nasazení nové verze kódu
-1. Upravte soubory přímo v editoru Replit.
-2. Klikněte na **▶ Run** – server se restartuje automaticky.
-3. Změny jsou okamžitě dostupné na vaší URL adrese.
-
-> **Tip:** Pokud Replit projekt po určité době nečinnosti „usne", lze to vyřešit nastavením UptimeRobot (viz níže) nebo upgradovat na Replit Always On.
+> **Důležité:** Ujistěte se, že soubor `.env` **není** nahrán na GitHub (obsahuje hesla). Soubor `.env.example` nahrát lze.
 
 ---
 
-## 📡 Monitoring s UptimeRobot
+### 2. Propojení GitHubu s Render.com
 
-UptimeRobot je bezplatná služba, která hlídá dostupnost vaší aplikace 24 hodin denně, 7 dní v týdnu.
+1. Přihlaste se nebo se zaregistrujte na [render.com](https://render.com) (bezplatný účet stačí).
+2. Na hlavním dashboardu klikněte na **+ New → Web Service**.
+3. Zvolte **Connect a GitHub repository** a autorizujte Render přístup k vašemu GitHub účtu.
+4. Ze seznamu vyberte repozitář `voting-app` a klikněte na **Connect**.
+
+---
+
+### 3. Nastavení Web Service
+
+Na stránce konfigurace vyplňte:
+
+| Pole | Hodnota |
+|------|---------|
+| **Name** | `voting-app` (nebo libovolný název) |
+| **Region** | Frankfurt (EU) – nejblíže ČR |
+| **Branch** | `main` |
+| **Runtime** | `Node` |
+| **Build Command** | `npm install` |
+| **Start Command** | `node server.js` |
+| **Instance Type** | `Free` |
+
+Potvrďte kliknutím na **Create Web Service**.
+
+---
+
+### 4. Nastavení Environment Variable (tajný token)
+
+Heslo pro reset hlasů **nesmí být v kódu** – nastavte ho přímo v Renderu:
+
+1. V dashboardu vašeho Web Service přejděte do záložky **Environment**.
+2. Klikněte na **Add Environment Variable**.
+3. Vyplňte:
+   - **Key:** `RESET_TOKEN`
+   - **Value:** vaše heslo (např. `MojeHeslo2025!`)
+4. Klikněte na **Save Changes** – Render server automaticky restartuje.
+
+---
+
+### 5. Spuštění a ověření
+
+1. Přejděte do záložky **Logs** – sledujte průběh buildu a spuštění.
+2. Jakmile uvidíte ` Server běží na portu ...`, aplikace je živá.
+3. Vaše URL adresa bude vypadat takto:  
+   `https://voting-app.onrender.com`
+
+---
+
+### 6. Nasazení nové verze kódu
+
+Díky propojení s GitHubem je aktualizace jednoduchá:
+
+1. Upravte soubory ve VS Code.
+2. Uložte změny a spusťte v terminálu:
+
+```bash
+git add .
+git commit -m "Popis změny"
+git push
+```
+
+3. Render zachytí nový commit a **automaticky spustí nový deploy** – bez nutnosti cokoli klikat na webu.
+
+---
+
+##  Monitoring s UptimeRobot
+
+UptimeRobot je bezplatná služba, která hlídá dostupnost aplikace 24 hodin denně, 7 dní v týdnu. Na bezplatném plánu Renderu aplikace po 15 minutách nečinnosti „usne" – UptimeRobot tomu zabrání pravidelným pingováním.
 
 ### Jak nastavit monitoring:
 
@@ -156,7 +208,7 @@ UptimeRobot je bezplatná služba, která hlídá dostupnost vaší aplikace 24 
    - Klikněte na **+ Add New Monitor**.
    - Monitor Type: **HTTP(s)**.
    - Friendly Name: `Hlasovaci aplikace`.
-   - URL: vložte URL vašeho Replit projektu (např. `https://voting-app.uzivatel.repl.co`).
+   - URL: vložte URL vašeho Render projektu (např. `https://voting-app.onrender.com`).
    - Monitoring Interval: **Every 5 minutes**.
    - Potvrďte kliknutím na **Create Monitor**.
 
@@ -170,14 +222,15 @@ UptimeRobot je bezplatná služba, která hlídá dostupnost vaší aplikace 24 
 4. **Výsledek:**
    - UptimeRobot bude každých 5 minut posílat HTTP požadavek na vaši URL.
    - Pokud server neodpoví (výpadek), dostanete okamžitě upozornění na e-mail.
-   - Navíc pravidelné pingy zabraňují tomu, aby Replit projekt „usnul".
+   - Pravidelné pingy zároveň zabraňují uspání aplikace a tím i ztrátě dat v `data.json`.
 
 ---
 
-## 🔧 Lokální spuštění (volitelné)
+##  Lokální spuštění (volitelné)
 
 ```bash
-# 1. Naklonuj nebo stáhni projekt
+# 1. Naklonuj projekt z GitHubu
+git clone https://github.com/VASE-UZIVATELSKE-JMENO/voting-app.git
 cd voting-app
 
 # 2. Nainstaluj závislosti
