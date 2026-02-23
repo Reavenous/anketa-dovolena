@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Administrace – Anketa</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+    <div class="card reset-section" style="margin-top: 50px;">
+      <h1> Tajná administrace</h1>
+      <p class="subtitle">Zde můžeš resetovat výsledky ankety.</p>
+      
+      <div class="reset-content" style="border-top: none; padding: 0;">
+        <input type="text" id="reset-token-input" placeholder="Zadej bezpečnostní token..." />
+        <button type="button" class="btn btn-danger" id="reset-btn">Vynulovat hlasy</button>
+      </div>
+      <div id="reset-message" class="message"></div>
+      
+      <div style="margin-top: 20px;">
+        <a href="index.html" class="btn btn-secondary">← Zpět na web</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const resetBtn = document.getElementById("reset-btn");
+    const resetTokenInput = document.getElementById("reset-token-input");
+    const resetMessage = document.getElementById("reset-message");
+
+    function showMessage(el, type, text) {
+      el.textContent = text;
+      el.className = `message ${type}`;
+    }
+
+    resetBtn.addEventListener("click", async () => {
+      const token = resetTokenInput.value.trim();
+      if (!token) {
+        showMessage(resetMessage, "error", "❗ Zadej bezpečnostní token.");
+        return;
+      }
+
+      try {
+        const res = await fetch("/reset", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showMessage(resetMessage, "error", data.error || "Reset se nezdařil.");
+          return;
+        }
+
+        showMessage(resetMessage, "success", "✅ " + data.message);
+        resetTokenInput.value = "";
+      } catch (err) {
+        showMessage(resetMessage, "error", "Nepodařilo se spojit se serverem.");
+      }
+    });
+  </script>
+</body>
+</html>
