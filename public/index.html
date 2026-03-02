@@ -166,8 +166,12 @@
           return;
         }
 
+        // ULOŽENÍ ZNAČKY DO PROHLÍŽEČE
+        localStorage.setItem("uz_hlasoval", "true");
+
         // Úspěch – zobraz výsledky
         renderResults(data.results);
+        voteAgainBtn.style.display = "none"; // Skryje tlačítko zpět, protože už hlasoval
         
         // Odeslání události do Google Analytics
         if (typeof gtag === 'function') {
@@ -184,6 +188,7 @@
         const res = await fetch("/results");
         const data = await res.json();
         renderResults(data);
+        voteAgainBtn.style.display = "inline-block"; // Zde tlačítko necháme, aby se mohl vrátit k volbě
         
         // Odeslání události do Google Analytics
         if (typeof gtag === 'function') {
@@ -207,6 +212,20 @@
     function showMessage(el, type, text) {
       el.textContent = text;
       el.className = `message ${type}`;
+    }
+
+    // ---- KONTROLA PŘI NAČTENÍ STRÁNKY ----
+    // Pokud má uživatel značku, rovnou mu ukážeme výsledky
+    if (localStorage.getItem("uz_hlasoval") === "true") {
+      voteCard.style.display = "none";
+      resultsCard.style.display = "block";
+      voteAgainBtn.style.display = "none"; // Nemůže se vrátit hlasovat
+
+      // Načteme aktuální data ze serveru
+      fetch("/results")
+        .then(res => res.json())
+        .then(data => renderResults(data))
+        .catch(err => console.error("Chyba při načítání výsledků", err));
     }
   </script>
 
