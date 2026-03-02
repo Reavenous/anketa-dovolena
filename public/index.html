@@ -169,19 +169,54 @@
           return;
         }
 
+        // ---- Odeslání hlasu ----
+    voteForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const selected = voteForm.querySelector('input[name="option"]:checked');
+      if (!selected) {
+        showMessage(voteMessage, "error", "❗ Prosím, vyber jednu možnost.");
+        return;
+      }
+
+      try {
+        const res = await fetch("/vote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ option: selected.value })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showMessage(voteMessage, "error", data.error || "Chyba serveru.");
+          return;
+        }
+
         // Úspěch – zobraz výsledky
         renderResults(data.results);
+        
+        // Odeslání události do Google Analytics
+        if (typeof gtag === 'function') {
+          gtag('event', 'hlasovani_odeslano');
+        }
       } catch (err) {
         showMessage(voteMessage, "error", "Nepodařilo se spojit se serverem.");
       }
     });
+    
 
-    // ---- Zobrazit výsledky bez hlasování ----
+   // ---- Zobrazit výsledky bez hlasování ----
     showResultsBtn.addEventListener("click", async () => {
       try {
         const res = await fetch("/results");
         const data = await res.json();
         renderResults(data);
+        
+        // Odeslání události do Google Analytics
+        if (typeof gtag === 'function') {
+          gtag('event', 'zobrazeny_vysledky');
+        }
       } catch (err) {
         showMessage(voteMessage, "error", "Nepodařilo se načíst výsledky.");
       }
