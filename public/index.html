@@ -103,11 +103,8 @@
     const voteMessage = document.getElementById("vote-message");
     const showResultsBtn = document.getElementById("show-results-btn");
     const voteAgainBtn = document.getElementById("vote-again-btn");
-    const resetBtn = document.getElementById("reset-btn");
-    const resetTokenInput = document.getElementById("reset-token-input");
-    const resetMessage = document.getElementById("reset-message");
 
-    // Mapování klíčů na popisky (emoji + text)
+    // Mapování klíčů na popisky
     const optionLabels = {
       a: " Pláž u moře",
       b: " Turistika na horách",
@@ -169,30 +166,6 @@
           return;
         }
 
-        // ---- Odeslání hlasu ----
-    voteForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const selected = voteForm.querySelector('input[name="option"]:checked');
-      if (!selected) {
-        showMessage(voteMessage, "error", "❗ Prosím, vyber jednu možnost.");
-        return;
-      }
-
-      try {
-        const res = await fetch("/vote", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ option: selected.value })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          showMessage(voteMessage, "error", data.error || "Chyba serveru.");
-          return;
-        }
-
         // Úspěch – zobraz výsledky
         renderResults(data.results);
         
@@ -204,9 +177,8 @@
         showMessage(voteMessage, "error", "Nepodařilo se spojit se serverem.");
       }
     });
-    
 
-   // ---- Zobrazit výsledky bez hlasování ----
+    // ---- Zobrazit výsledky bez hlasování ----
     showResultsBtn.addEventListener("click", async () => {
       try {
         const res = await fetch("/results");
@@ -229,35 +201,6 @@
       voteMessage.className = "message"; // Skrytí zprávy
       voteMessage.textContent = "";
       voteForm.reset();
-    });
-
-    // ---- Reset hlasování ----
-    resetBtn.addEventListener("click", async () => {
-      const token = resetTokenInput.value.trim();
-      if (!token) {
-        showMessage(resetMessage, "error", "❗ Zadej bezpečnostní token.");
-        return;
-      }
-
-      try {
-        const res = await fetch("/reset", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          showMessage(resetMessage, "error", data.error || "Reset se nezdařil.");
-          return;
-        }
-
-        showMessage(resetMessage, "success", "✅ " + data.message);
-        resetTokenInput.value = "";
-      } catch (err) {
-        showMessage(resetMessage, "error", "Nepodařilo se spojit se serverem.");
-      }
     });
 
     // ---- Pomocná funkce pro zobrazení zprávy ----
