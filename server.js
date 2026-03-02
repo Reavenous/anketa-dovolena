@@ -28,6 +28,17 @@ function loadData() {
 function saveData(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf-8");
 }
+// ---- Záznam logů návštěvnosti (Access Logs) ----
+app.use((req, res, next) => {
+  // Získání IP adresy (Render používá proxy, proto 'x-forwarded-for')
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const time = new Date().toISOString();
+  
+  // Vypsání do konzole (Render logů)
+  console.log(`[ACCESS LOG] Čas: ${time} | IP: ${ip} | Metoda: ${req.method} | URL: ${req.originalUrl}`);
+  
+  next(); // Pokračování na další zpracování
+});
 
 // ---- Middleware ----
 
